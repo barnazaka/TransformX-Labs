@@ -1,38 +1,69 @@
 <?php
 require_once(LIB_PATH.DS.'database.php');
-class Exercise {
-	protected static  $tblname = "tblexercise";
+class Student {
+	protected static  $tblname = "tblstudent";
 
 	function dbfields () {
 		global $mydb;
 		return $mydb->getfieldsononetable(self::$tblname);
+
 	}
-	function listofexercise(){
+	function listofstudents(){
 		global $mydb;
 		$mydb->setQuery("SELECT * FROM ".self::$tblname);
 		return $cur;
 	}
-	function find_exercise($id="",$category=""){
+	function find_students($id="",$name=""){
 		global $mydb;
 		$mydb->setQuery("SELECT * FROM ".self::$tblname." 
-			WHERE ExerciseID = {$id} OR Category = '{$category}'");
+			WHERE StudentID = {$id} OR LNAME = '{$name}'");
 		$cur = $mydb->executeQuery();
 		$row_count = $mydb->num_rows($cur);
 		return $row_count;
 	}
- 
-	function single_exercise($id=""){
-			global $mydb;
-			$mydb->setQuery("SELECT * FROM ".self::$tblname." 
-				Where ExerciseID= '{$id}' LIMIT 1");
-			$cur = $mydb->loadSingleResult();
-			return $cur;
+
+	function find_all_students($name=""){
+		global $mydb;
+		$mydb->setQuery("SELECT * FROM ".self::$tblname." 
+			WHERE LNAME = '{$name}'");
+		$cur = $mydb->executeQuery();
+		$row_count = $mydb->num_rows($cur);
+		return $row_count;
+	}
+		static function studentAuthentication($email,$h_pass){
+		global $mydb;
+		$mydb->setQuery("SELECT * FROM `tblstudent` WHERE `STUDUSERNAME` = '". $email ."' and `STUDPASS` = '". $h_pass ."'");
+		$cur = $mydb->executeQuery();
+		if($cur==false){
+			die(mysqli_error());
+		}
+		$row_count = $mydb->num_rows($cur);//get the number of count
+		 if ($row_count == 1){
+		 $user_found = $mydb->loadSingleResult();
+		 	$_SESSION['StudentID']   	= $user_found->StudentID;
+		 	$_SESSION['Fname']      	= $user_found->Fname;
+		 	$_SESSION['Lname']      	= $user_found->Lname;
+		 	$_SESSION['USERNAME'] 		= $user_found->STUDUSERNAME;
+		 	$_SESSION['STUDPASS'] 		= $user_found->STUDPASS; 
+		   return true;
+		 }else{
+		 	return false;
+		 }
+	}
+	function find_pass($id="",$pass=""){
+		global $mydb;
+		$mydb->setQuery("SELECT * FROM ".self::$tblname." 
+			WHERE StudentID = {$id} and STUDPASS = '{$pass}'");
+		$cur = $mydb->executeQuery();
+		$row_count = $mydb->num_rows($cur);
+		return $row_count;
 	}
 
-	function single_exercise_lesson($id=""){
+	 
+	function single_students($id=""){
 			global $mydb;
 			$mydb->setQuery("SELECT * FROM ".self::$tblname." 
-				Where LessonID= '{$id}' LIMIT 1");
+				Where StudentID= '{$id}' LIMIT 1");
 			$cur = $mydb->loadSingleResult();
 			return $cur;
 	}
@@ -117,7 +148,7 @@ class Exercise {
 		}
 		$sql = "UPDATE ".self::$tblname." SET ";
 		$sql .= join(", ", $attribute_pairs);
-		$sql .= " WHERE ExerciseID=". $id;
+		$sql .= " WHERE StudentID=". $id;
 	  $mydb->setQuery($sql);
 	 	if(!$mydb->executeQuery()) return false; 	
 		
@@ -126,7 +157,7 @@ class Exercise {
 	public function delete($id=0) {
 		global $mydb;
 		  $sql = "DELETE FROM ".self::$tblname;
-		  $sql .= " WHERE ExerciseID=". $id;
+		  $sql .= " WHERE StudentID=". $id;
 		  $sql .= " LIMIT 1 ";
 		  $mydb->setQuery($sql);
 		  

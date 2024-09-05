@@ -1,41 +1,39 @@
 <?php
 require_once(LIB_PATH.DS.'database.php');
-class Exercise {
-	protected static  $tblname = "tblexercise";
+class Autonumber {
+	protected static  $tblname = "tblautonumbers";
 
 	function dbfields () {
 		global $mydb;
 		return $mydb->getfieldsononetable(self::$tblname);
-	}
-	function listofexercise(){
-		global $mydb;
-		$mydb->setQuery("SELECT * FROM ".self::$tblname);
-		return $cur;
-	}
-	function find_exercise($id="",$category=""){
-		global $mydb;
-		$mydb->setQuery("SELECT * FROM ".self::$tblname." 
-			WHERE ExerciseID = {$id} OR Category = '{$category}'");
-		$cur = $mydb->executeQuery();
-		$row_count = $mydb->num_rows($cur);
-		return $row_count;
+
 	}
  
-	function single_exercise($id=""){
+  	function single_autonumber($id=""){
 			global $mydb;
 			$mydb->setQuery("SELECT * FROM ".self::$tblname." 
-				Where ExerciseID= '{$id}' LIMIT 1");
+				Where AUTOID= '{$id}' LIMIT 1");
 			$cur = $mydb->loadSingleResult();
 			return $cur;
 	}
+ 
+	// function set_autonumber($id=""){
+	// 		global $mydb;
+	// 		$mydb->setQuery("SELECT concat(`AUTOSTART`, `AUTOEND`) AS 'AUTO' FROM ".self::$tblname." 
+	// 			Where AUTOID= '{$id}' LIMIT 1");
+	// 		$cur = $mydb->loadSingleResult();
+	// 		return $cur;
+	// } 
 
-	function single_exercise_lesson($id=""){
+    function set_autonumber($Autokey){
 			global $mydb;
-			$mydb->setQuery("SELECT * FROM ".self::$tblname." 
-				Where LessonID= '{$id}' LIMIT 1");
+			$mydb->setQuery("SELECT concat(`AUTOSTART`, `AUTOEND`) AS 'AUTO' FROM ".self::$tblname." 
+				Where AUTOKEY= '{$Autokey}' LIMIT 1");
 			$cur = $mydb->loadSingleResult();
 			return $cur;
-	}
+	} 
+ 
+
 	/*---Instantiation of Object dynamically---*/
 	static function instantiate($record) {
 		$object = new self;
@@ -108,7 +106,7 @@ class Exercise {
 	  }
 	}
 
-	public function update($id=0) {
+	public function update($id="") {
 	  global $mydb;
 		$attributes = $this->sanitized_attributes();
 		$attribute_pairs = array();
@@ -117,16 +115,36 @@ class Exercise {
 		}
 		$sql = "UPDATE ".self::$tblname." SET ";
 		$sql .= join(", ", $attribute_pairs);
-		$sql .= " WHERE ExerciseID=". $id;
+		$sql .= " WHERE AUTOID='{$id}'";
 	  $mydb->setQuery($sql);
 	 	if(!$mydb->executeQuery()) return false; 	
 		
 	}
 
-	public function delete($id=0) {
+	public function auto_update($id="") {
+	  global $mydb;
+		$sql = "UPDATE ".self::$tblname." SET ";
+		$sql .= "AutoEnd = AutoEnd + AutoInc";
+		$sql .= " WHERE AUTOKEY='{$id}'";
+	  $mydb->setQuery($sql);
+	 	if(!$mydb->executeQuery())  return false; 	
+		
+	}
+ 
+	public function delete($id="") {
 		global $mydb;
 		  $sql = "DELETE FROM ".self::$tblname;
-		  $sql .= " WHERE ExerciseID=". $id;
+		  $sql .= " WHERE AUTOKEY='{$id}'";
+		  $sql .= " LIMIT 1 ";
+		  $mydb->setQuery($sql);
+		  
+			if(!$mydb->executeQuery()) return false; 	
+	
+	}	
+	public function deletebyid($id=0) {
+		global $mydb;
+		  $sql = "DELETE FROM ".self::$tblname;
+		  $sql .= " WHERE AUTOID='{$id}'";
 		  $sql .= " LIMIT 1 ";
 		  $mydb->setQuery($sql);
 		  

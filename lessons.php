@@ -1,41 +1,46 @@
 <?php
 require_once(LIB_PATH.DS.'database.php');
-class Exercise {
-	protected static  $tblname = "tblexercise";
+ // SELECT `LessonID`, `EVENT_TEXT`, `EVENT_WHAT`, `EVENT_WHEN`, `EVENT_WHERE` FROM `tblevent` WHERE 1
+ class Lesson {
+	protected static  $tblname = "tbllesson";
 
 	function dbfields () {
 		global $mydb;
 		return $mydb->getfieldsononetable(self::$tblname);
+
 	}
-	function listofexercise(){
+	function listoflesson(){
 		global $mydb;
 		$mydb->setQuery("SELECT * FROM ".self::$tblname);
 		return $cur;
 	}
-	function find_exercise($id="",$category=""){
+	function find_lesson($id="",$chapter=""){
 		global $mydb;
 		$mydb->setQuery("SELECT * FROM ".self::$tblname." 
-			WHERE ExerciseID = {$id} OR Category = '{$category}'");
+			WHERE LessonID = {$id} OR LessonChapter = '{$chapter}'");
+		$cur = $mydb->executeQuery();
+		$row_count = $mydb->num_rows($cur);
+		return $row_count;
+	} 
+
+	function find_all_lesson($chapter=""){
+		global $mydb;
+		$mydb->setQuery("SELECT * FROM ".self::$tblname." 
+			WHERE LessonChapter = '{$chapter}'");
 		$cur = $mydb->executeQuery();
 		$row_count = $mydb->num_rows($cur);
 		return $row_count;
 	}
- 
-	function single_exercise($id=""){
-			global $mydb;
-			$mydb->setQuery("SELECT * FROM ".self::$tblname." 
-				Where ExerciseID= '{$id}' LIMIT 1");
-			$cur = $mydb->loadSingleResult();
-			return $cur;
-	}
-
-	function single_exercise_lesson($id=""){
+	 
+	function single_lesson($id=0){
 			global $mydb;
 			$mydb->setQuery("SELECT * FROM ".self::$tblname." 
 				Where LessonID= '{$id}' LIMIT 1");
 			$cur = $mydb->loadSingleResult();
 			return $cur;
 	}
+
+	 
 	/*---Instantiation of Object dynamically---*/
 	static function instantiate($record) {
 		$object = new self;
@@ -117,7 +122,7 @@ class Exercise {
 		}
 		$sql = "UPDATE ".self::$tblname." SET ";
 		$sql .= join(", ", $attribute_pairs);
-		$sql .= " WHERE ExerciseID=". $id;
+		$sql .= " WHERE LessonID=". $id;
 	  $mydb->setQuery($sql);
 	 	if(!$mydb->executeQuery()) return false; 	
 		
@@ -126,7 +131,7 @@ class Exercise {
 	public function delete($id=0) {
 		global $mydb;
 		  $sql = "DELETE FROM ".self::$tblname;
-		  $sql .= " WHERE ExerciseID=". $id;
+		  $sql .= " WHERE LessonID=". $id;
 		  $sql .= " LIMIT 1 ";
 		  $mydb->setQuery($sql);
 		  

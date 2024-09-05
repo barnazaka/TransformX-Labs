@@ -1,38 +1,49 @@
 <?php
 require_once(LIB_PATH.DS.'database.php');
-class Exercise {
-	protected static  $tblname = "tblexercise";
+class User {
+	protected static  $tblname = "tblusers";
 
 	function dbfields () {
 		global $mydb;
 		return $mydb->getfieldsononetable(self::$tblname);
 	}
-	function listofexercise(){
+	function listofuser(){
 		global $mydb;
 		$mydb->setQuery("SELECT * FROM ".self::$tblname);
 		return $cur;
 	}
-	function find_exercise($id="",$category=""){
+	function find_user($id="",$user_name=""){
 		global $mydb;
 		$mydb->setQuery("SELECT * FROM ".self::$tblname." 
-			WHERE ExerciseID = {$id} OR Category = '{$category}'");
+			WHERE USERID = {$id} OR UEMAIL = '{$user_name}'");
 		$cur = $mydb->executeQuery();
 		$row_count = $mydb->num_rows($cur);
 		return $row_count;
 	}
- 
-	function single_exercise($id=""){
-			global $mydb;
-			$mydb->setQuery("SELECT * FROM ".self::$tblname." 
-				Where ExerciseID= '{$id}' LIMIT 1");
-			$cur = $mydb->loadSingleResult();
-			return $cur;
+	static function userAuthentication($email,$h_pass){
+		global $mydb;
+		$mydb->setQuery("SELECT * FROM `tblusers` WHERE `UEMAIL` = '". $email ."' and `PASS` = '". $h_pass ."'");
+		$cur = $mydb->executeQuery();
+		if($cur==false){
+			die(mysql_error());
+		}
+		$row_count = $mydb->num_rows($cur);//get the number of count
+		 if ($row_count == 1){
+		 $user_found = $mydb->loadSingleResult();
+		 	$_SESSION['USERID']   		= $user_found->USERID;
+		 	$_SESSION['NAME']      		= $user_found->NAME;
+		 	$_SESSION['UEMAIL'] 		= $user_found->UEMAIL;
+		 	$_SESSION['PASS'] 			= $user_found->PASS;
+		 	$_SESSION['TYPE'] 			= $user_found->TYPE;
+		   return true;
+		 }else{
+		 	return false;
+		 }
 	}
-
-	function single_exercise_lesson($id=""){
+	function single_user($id=""){
 			global $mydb;
 			$mydb->setQuery("SELECT * FROM ".self::$tblname." 
-				Where LessonID= '{$id}' LIMIT 1");
+				Where USERID= '{$id}' LIMIT 1");
 			$cur = $mydb->loadSingleResult();
 			return $cur;
 	}
@@ -117,7 +128,7 @@ class Exercise {
 		}
 		$sql = "UPDATE ".self::$tblname." SET ";
 		$sql .= join(", ", $attribute_pairs);
-		$sql .= " WHERE ExerciseID=". $id;
+		$sql .= " WHERE USERID=". $id;
 	  $mydb->setQuery($sql);
 	 	if(!$mydb->executeQuery()) return false; 	
 		
@@ -126,7 +137,7 @@ class Exercise {
 	public function delete($id=0) {
 		global $mydb;
 		  $sql = "DELETE FROM ".self::$tblname;
-		  $sql .= " WHERE ExerciseID=". $id;
+		  $sql .= " WHERE USERID=". $id;
 		  $sql .= " LIMIT 1 ";
 		  $mydb->setQuery($sql);
 		  
